@@ -1,35 +1,28 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\StaffController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/krithick/{id}', function($id){
-    return "<h1>Hey Buddy Kn {$id} </h1>";
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/Krithick-1/{name}',function($name){
-    if($name=="first"){
-        return "<h1> First-page </h1>";
-    }
-    else if ($name== "second"){
-        return "<h1> Seocnd-page </h1>"; 
-    }
-    else{
-        return "INvaild";
-    }
+require __DIR__.'/auth.php';
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin-dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/staff-dashboard', [StaffController::class, 'index'])->name('staff.dashboard');
 });
 
-Route::get('/users/{id}/{name}',function($id,$name){
-    return "<h1> User ID is :{$id} <br> User Name is :{$name}</h1>";
-})->where("name","[A-Za-z]+")->where("id","[0-9]+");
-
-Route::get('/category/{category}',function($category){
-    return "<h1> I am {$category} </h1>"; 
-})->whereIn('category',['Batman','Superman','Ironman']);
-
-Route::get('/about',function(){
-    return view('about');
-});
+Route::get('/admin-dashboard', [AdminController::class, 'index'])->middleware('auth');
